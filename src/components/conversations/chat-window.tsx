@@ -215,11 +215,14 @@ export function ChatWindow({ conversation, initialMessages, currentUserId }: Cha
     return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })
   }
 
+  // Filter out messages without text (empty messages)
+  const validMessages = messages.filter(m => m.message_text && m.message_text.trim() !== '')
+
   // Group messages by date
   const groupedMessages: { date: string; messages: Message[] }[] = []
   let currentDate = ''
 
-  messages.forEach((message) => {
+  validMessages.forEach((message) => {
     const messageDate = formatDate(message.created_at)
     if (messageDate !== currentDate) {
       currentDate = messageDate

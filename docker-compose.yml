@@ -17,3 +17,29 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    depends_on:
+      - whatsapp
+
+  whatsapp:
+    build:
+      context: ./whatsapp-service
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - PORT=3001
+      - NEXTJS_APP_URL=${NEXT_PUBLIC_APP_URL}
+      - WEBHOOK_SECRET=${WHATSAPP_SERVICE_SECRET}
+    volumes:
+      - whatsapp_sessions:/app/.wwebjs_auth
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  whatsapp_sessions:

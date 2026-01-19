@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
         organization_id: profile.current_organization_id,
         conversation_id: conversationId,
         external_message_id: String(sentMessage.message_id),
-        content: text,
+        message_text: text,
         message_type: 'text',
         sender_type: 'user',
         sender_id: user.id,

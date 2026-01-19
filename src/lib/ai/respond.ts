@@ -77,7 +77,7 @@ export async function handleAIResponse(
     // 3. Get conversation history for context
     const { data: messagesData } = await supabase
       .from('messages')
-      .select('content, sender_type, created_at')
+      .select('message_text, sender_type, created_at')
       .eq('conversation_id', conversationId)
       .order('created_at', { ascending: false })
       .limit(aiSettings.context_messages_count || 10)
@@ -90,7 +90,7 @@ export async function handleAIResponse(
       .reverse()
       .map((msg) => ({
         role: msg.sender_type === 'lead' ? 'user' : 'assistant',
-        content: msg.content,
+        content: msg.message_text,
       })) as ChatMessage[]
 
     // Add delay before responding (more natural)
@@ -131,7 +131,7 @@ export async function handleAIResponse(
     const { error: insertError } = await supabase.from('messages').insert({
       organization_id: organizationId,
       conversation_id: conversationId,
-      content: result.content,
+      message_text: result.content,
       sender_type: 'ai',
       message_type: 'text',
       status: 'sent',

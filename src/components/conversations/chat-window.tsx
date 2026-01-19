@@ -192,12 +192,17 @@ export function ChatWindow({ conversation, initialMessages, currentUserId }: Cha
   }
 
   const formatTime = (dateString: string) => {
+    if (!dateString) return ''
     const date = new Date(dateString)
+    if (isNaN(date.getTime())) return ''
     return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
   }
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return 'Сегодня'
     const date = new Date(dateString)
+    if (isNaN(date.getTime())) return 'Сегодня'
+
     const today = new Date()
     const yesterday = new Date(today)
     yesterday.setDate(yesterday.getDate() - 1)

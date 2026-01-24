@@ -12,6 +12,7 @@ export interface SessionCredentials {
   phone_number?: string
   pushname?: string
   platform?: string
+  [key: string]: unknown
 }
 
 export interface IncomingMessage {

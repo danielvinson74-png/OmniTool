@@ -63,9 +63,12 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       )
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const conversation = conversationData as any
+
     return NextResponse.json({
       success: true,
-      conversation: conversationData,
+      ai_enabled: conversation.ai_enabled,
     })
   } catch (error) {
     console.error('Toggle AI error:', error)

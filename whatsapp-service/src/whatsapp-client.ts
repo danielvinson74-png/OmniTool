@@ -134,8 +134,8 @@ export class WhatsAppClient {
     // Handle location
     if (msg.location) {
       message.location = {
-        latitude: msg.location.latitude,
-        longitude: msg.location.longitude,
+        latitude: Number(msg.location.latitude),
+        longitude: Number(msg.location.longitude),
       }
       message.body = `📍 ${msg.location.latitude}, ${msg.location.longitude}`
     }

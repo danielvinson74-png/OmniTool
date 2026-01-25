@@ -6,13 +6,16 @@ const WHATSAPP_SERVICE_URL = process.env.WHATSAPP_SERVICE_URL || 'http://localho
 const WHATSAPP_SERVICE_SECRET = process.env.WHATSAPP_SERVICE_SECRET || 'whatsapp-service-secret-key'
 
 async function sendWhatsAppMessage(orgId: string, chatId: string, message: string) {
+  // Ensure chatId has correct WhatsApp format
+  const formattedChatId = chatId.endsWith('@c.us') ? chatId : `${chatId}@c.us`
+
   const response = await fetch(`${WHATSAPP_SERVICE_URL}/sessions/${orgId}/send`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${WHATSAPP_SERVICE_SECRET}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ chatId, message }),
+    body: JSON.stringify({ chatId: formattedChatId, message }),
   })
 
   const data = await response.json()

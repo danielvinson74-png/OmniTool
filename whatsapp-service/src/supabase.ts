@@ -62,27 +62,24 @@ export async function findOrCreateLead(
   phoneNumber: string,
   pushname?: string
 ) {
-  // Remove @c.us suffix
   const cleanPhone = phoneNumber.replace('@c.us', '')
 
-  // Try to find existing lead
-  const { data: existingLead } = await supabase
+  // Search by phone (compatible with existing schema)
+  const { data: existingByPhone } = await supabase
     .from('leads')
     .select('*')
     .eq('organization_id', orgId)
-    .eq('external_id', cleanPhone)
-    .eq('external_id_type', 'whatsapp')
+    .eq('phone', cleanPhone)
     .single()
 
-  if (existingLead) {
-    // Update name if provided
-    if (pushname && pushname !== existingLead.name) {
+  if (existingByPhone) {
+    if (pushname && pushname !== existingByPhone.name) {
       await supabase
         .from('leads')
         .update({ name: pushname, updated_at: new Date().toISOString() })
-        .eq('id', existingLead.id)
+        .eq('id', existingByPhone.id)
     }
-    return existingLead
+    return existingByPhone
   }
 
   // Create new lead
@@ -90,8 +87,6 @@ export async function findOrCreateLead(
     .from('leads')
     .insert({
       organization_id: orgId,
-      external_id: cleanPhone,
-      external_id_type: 'whatsapp',
       name: pushname || cleanPhone,
       phone: cleanPhone,
       source: 'whatsapp',
@@ -115,7 +110,6 @@ export async function findOrCreateConversation(
   connectionId: string,
   title: string
 ) {
-  // Try to find existing conversation
   const { data: existingConv } = await supabase
     .from('conversations')
     .select('*')
@@ -128,27 +122,6 @@ export async function findOrCreateConversation(
     return existingConv
   }
 
-  // Check conversation limit
-  const { count } = await supabase
-    .from('conversations')
-    .select('*', { count: 'exact', head: true })
-    .eq('organization_id', orgId)
-
-  // Get subscription plan limits
-  const { data: subscription } = await supabase
-    .from('subscriptions')
-    .select('subscription_plans(conversations_limit)')
-    .eq('organization_id', orgId)
-    .eq('status', 'active')
-    .single()
-
-  const limit = (subscription?.subscription_plans as { conversations_limit?: number })?.conversations_limit || 50
-
-  if (limit !== -1 && (count || 0) >= limit) {
-    throw new Error(`Conversation limit reached (${limit}). Please upgrade your plan.`)
-  }
-
-  // Create new conversation
   const { data: newConv, error } = await supabase
     .from('conversations')
     .insert({
@@ -159,6 +132,7 @@ export async function findOrCreateConversation(
       messenger_type: 'whatsapp',
       title,
       status: 'open',
+      unread_count: 0,
     })
     .select()
     .single()
@@ -186,7 +160,7 @@ export async function saveMessage(
     .insert({
       organization_id: orgId,
       conversation_id: conversationId,
-      content,
+      message_text: content,
       sender_type: senderType,
       message_type: messageType,
       external_message_id: externalMessageId,
@@ -202,23 +176,26 @@ export async function saveMessage(
     throw error
   }
 
-  // Update conversation
+  // Update conversation preview and timestamp
   await supabase
     .from('conversations')
     .update({
       last_message_at: new Date().toISOString(),
       last_message_preview: content.slice(0, 100),
-      unread_count: senderType === 'lead' ? supabase.rpc('increment_unread', { conv_id: conversationId }) : 0,
       updated_at: new Date().toISOString(),
     })
     .eq('id', conversationId)
+
+  // Increment unread count if from lead
+  if (senderType === 'lead') {
+    await updateConversationUnread(conversationId, true)
+  }
 
   return data
 }
 
 export async function updateConversationUnread(conversationId: string, increment: boolean) {
   if (increment) {
-    // Get current count and increment
     const { data: conv } = await supabase
       .from('conversations')
       .select('unread_count')
@@ -229,16 +206,12 @@ export async function updateConversationUnread(conversationId: string, increment
       .from('conversations')
       .update({
         unread_count: (conv?.unread_count || 0) + 1,
-        updated_at: new Date().toISOString(),
       })
       .eq('id', conversationId)
   } else {
     await supabase
       .from('conversations')
-      .update({
-        unread_count: 0,
-        updated_at: new Date().toISOString(),
-      })
+      .update({ unread_count: 0 })
       .eq('id', conversationId)
   }
 }

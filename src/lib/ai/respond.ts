@@ -262,7 +262,7 @@ async function sendWhatsAppMessage(
           Authorization: `Bearer ${whatsappSecret}`,
         },
         body: JSON.stringify({
-          to: chatId,
+          chatId: chatId,
           message: text,
         }),
       }

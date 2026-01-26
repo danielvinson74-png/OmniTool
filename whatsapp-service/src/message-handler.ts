@@ -7,6 +7,9 @@ import {
   updateConversationUnread,
 } from './supabase'
 
+const NEXTJS_APP_URL = process.env.NEXTJS_APP_URL || 'http://localhost:3000'
+const WHATSAPP_SERVICE_SECRET = process.env.WEBHOOK_SECRET || 'whatsapp-service-secret-key'
+
 export async function handleIncomingMessage(
   orgId: string,
   message: IncomingMessage
@@ -143,7 +146,42 @@ export async function handleIncomingMessage(
     await updateConversationUnread(conversation.id, true)
 
     console.log(`[${orgId}] Message saved successfully`)
+
+    // Trigger AI response for text messages
+    if (messageType === 'text' && content) {
+      triggerAIResponse(orgId, conversation.id, lead.id, content, message.from)
+    }
   } catch (err) {
     console.error(`[${orgId}] Error handling message:`, err)
   }
+}
+
+function triggerAIResponse(
+  orgId: string,
+  conversationId: string,
+  leadId: string,
+  messageText: string,
+  externalChatId: string
+) {
+  // Call the main app webhook to trigger AI response (fire and forget)
+  fetch(`${NEXTJS_APP_URL}/api/webhooks/whatsapp/ai`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${WHATSAPP_SERVICE_SECRET}`,
+    },
+    body: JSON.stringify({
+      organizationId: orgId,
+      conversationId,
+      leadId,
+      messageText,
+      externalChatId,
+    }),
+  }).then((res) => {
+    if (!res.ok) {
+      console.error(`[${orgId}] AI webhook failed:`, res.status)
+    }
+  }).catch((err) => {
+    console.error(`[${orgId}] AI webhook error:`, err)
+  })
 }

@@ -189,7 +189,7 @@ export class WhatsAppClient {
     if (this.session.status !== 'ready') {
       throw new Error('WhatsApp client is not ready')
     }
-    return await this.client.sendMessage(chatId, message)
+    return await this.client.sendMessage(chatId, message, { sendSeen: false })
   }
 
   async sendMedia(

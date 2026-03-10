@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
@@ -392,13 +392,20 @@ export function ChatWindow({ conversation, initialMessages, currentUserId }: Cha
       </div>
 
       {/* Input */}
-      <form onSubmit={handleSend} className="flex gap-2 border-t pt-4">
-        <Input
+      <form onSubmit={handleSend} className="flex gap-2 border-t pt-4 items-end">
+        <Textarea
           value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          placeholder="Введите сообщение..."
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewMessage(e.target.value)}
+          onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault()
+              handleSend(e as unknown as React.FormEvent)
+            }
+          }}
+          placeholder="Введите сообщение... (Enter — отправить, Shift+Enter — перенос)"
           disabled={sending}
-          className="flex-1"
+          className="flex-1 min-h-[40px] max-h-[160px] resize-none"
+          rows={1}
         />
         <Button type="submit" disabled={!newMessage.trim() || sending}>
           {sending ? (

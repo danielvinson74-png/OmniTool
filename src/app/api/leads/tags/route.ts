@@ -29,7 +29,8 @@ export async function GET() {
 
     if (error) throw error
 
-    const allTags = [...new Set((leads ?? []).flatMap((l) => l.tags ?? []))].sort()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const allTags = [...new Set(((leads ?? []) as any[]).flatMap((l) => l.tags ?? []))].sort()
 
     return NextResponse.json({ success: true, tags: allTags })
   } catch (error) {

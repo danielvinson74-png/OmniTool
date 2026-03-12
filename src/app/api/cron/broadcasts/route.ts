@@ -87,10 +87,11 @@ export async function POST(request: NextRequest) {
           .eq('id', recipient.id)
 
         // Increment stats_sent atomically
-        await supabase.rpc('increment_broadcast_stat' as never, {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (supabase.rpc('increment_broadcast_stat' as any, {
           broadcast_id: recipient.broadcast_id,
           stat_name: 'stats_sent',
-        } as never).catch(() => {
+        } as any) as any).catch(() => {
           // Fallback: manual increment
           supabase
             .from('broadcasts')

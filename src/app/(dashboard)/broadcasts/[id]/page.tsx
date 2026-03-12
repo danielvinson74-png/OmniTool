@@ -49,10 +49,13 @@ export default async function BroadcastDetailPage({
   const broadcast = broadcastData as any
 
   // Per-step stats
-  const { data: recipientStats } = await supabase
+  const { data: recipientStatsRaw } = await supabase
     .from('broadcast_recipients')
     .select('step_id, status, has_replied')
     .eq('broadcast_id', id)
+
+  type RecipientStat = { step_id: string; status: string; has_replied: boolean }
+  const recipientStats = recipientStatsRaw as RecipientStat[] | null
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const stepStats: Record<string, any> = {}

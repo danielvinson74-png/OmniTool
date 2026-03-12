@@ -47,10 +47,12 @@ export async function GET(request: NextRequest) {
       query = query.in('leads.status', statuses)
     }
 
-    const { data: conversations, error } = await query
+    const { data: conversationsRaw, error } = await query
 
     if (error) throw error
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const conversations = conversationsRaw as any[] | null
     let eligible = conversations ?? []
 
     if (tags.length > 0) {

@@ -72,9 +72,12 @@ export async function POST(
       query = query.in('leads.status', segmentFilters.statuses)
     }
 
-    const { data: conversations, error: queryError } = await query
+    const { data: conversationsRaw, error: queryError } = await query
 
     if (queryError) throw queryError
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const conversations = conversationsRaw as any[] | null
 
     // Filter by tags (overlap) in JS since Supabase doesn't support array overlap on joined tables easily
     let eligible = conversations ?? []

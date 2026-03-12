@@ -34,24 +34,28 @@ export async function POST(request: NextRequest) {
     for (const recipient of recipients) {
       // Fetch broadcast config (cached)
       if (!broadcastCache[recipient.broadcast_id]) {
-        const { data: bc } = await supabase
+        const { data: bcData } = await supabase
           .from('broadcasts')
           .select('delay_between_sends, messenger_type')
           .eq('id', recipient.broadcast_id)
           .single()
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const bc = bcData as any
         if (bc) broadcastCache[recipient.broadcast_id] = bc
       }
 
       const broadcastConfig = broadcastCache[recipient.broadcast_id]
 
       // Fetch step message text
-      const { data: step } = await supabase
+      const { data: stepData } = await supabase
         .from('broadcast_steps')
         .select('message_text')
         .eq('id', recipient.step_id)
         .single()
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const step = stepData as any
       if (!step) {
         await supabase
           .from('broadcast_recipients')
@@ -90,11 +94,13 @@ export async function POST(request: NextRequest) {
             .select('stats_sent')
             .eq('id', recipient.broadcast_id)
             .single()
-            .then(({ data }) => {
-              if (data) {
+            .then(({ data: sentData }) => {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const d = sentData as any
+              if (d) {
                 supabase
                   .from('broadcasts')
-                  .update({ stats_sent: (data.stats_sent ?? 0) + 1 } as never)
+                  .update({ stats_sent: (d.stats_sent ?? 0) + 1 } as never)
                   .eq('id', recipient.broadcast_id)
               }
             })
@@ -110,15 +116,17 @@ export async function POST(request: NextRequest) {
           .eq('id', recipient.id)
 
         // Increment stats_failed
-        const { data: bc } = await supabase
+        const { data: bcFailData } = await supabase
           .from('broadcasts')
           .select('stats_failed')
           .eq('id', recipient.broadcast_id)
           .single()
-        if (bc) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const bcFail = bcFailData as any
+        if (bcFail) {
           await supabase
             .from('broadcasts')
-            .update({ stats_failed: (bc.stats_failed ?? 0) + 1 } as never)
+            .update({ stats_failed: (bcFail.stats_failed ?? 0) + 1 } as never)
             .eq('id', recipient.broadcast_id)
         }
       }

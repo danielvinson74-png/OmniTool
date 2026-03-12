@@ -27,13 +27,15 @@ export async function POST(
 
     const orgId = profile.current_organization_id
 
-    const { data: existing } = await supabase
+    const { data: existingData } = await supabase
       .from('broadcasts')
       .select('status')
       .eq('id', id)
       .eq('organization_id', orgId)
       .single()
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const existing = existingData as any
     if (!existing) return NextResponse.json({ error: 'Broadcast not found' }, { status: 404 })
 
     if (!['scheduled', 'sending'].includes(existing.status)) {

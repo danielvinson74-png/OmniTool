@@ -88,13 +88,15 @@ export async function PUT(
     if (!orgId) return NextResponse.json({ error: 'No organization' }, { status: 400 })
 
     // Only allow editing drafts
-    const { data: existing } = await supabase
+    const { data: existingData } = await supabase
       .from('broadcasts')
       .select('status')
       .eq('id', id)
       .eq('organization_id', orgId)
       .single()
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const existing = existingData as any
     if (!existing) return NextResponse.json({ error: 'Broadcast not found' }, { status: 404 })
     if (existing.status !== 'draft') {
       return NextResponse.json({ error: 'Only draft broadcasts can be edited' }, { status: 409 })
@@ -162,13 +164,15 @@ export async function DELETE(
     const orgId = await getOrgId(supabase, user.id)
     if (!orgId) return NextResponse.json({ error: 'No organization' }, { status: 400 })
 
-    const { data: existing } = await supabase
+    const { data: existingData } = await supabase
       .from('broadcasts')
       .select('status')
       .eq('id', id)
       .eq('organization_id', orgId)
       .single()
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const existing = existingData as any
     if (!existing) return NextResponse.json({ error: 'Broadcast not found' }, { status: 404 })
     if (existing.status !== 'draft') {
       return NextResponse.json({ error: 'Only draft broadcasts can be deleted' }, { status: 409 })

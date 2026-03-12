@@ -21,7 +21,8 @@ export async function POST(request: NextRequest) {
   try {
     // Atomically claim a batch of pending recipients
     const { data: recipients, error: claimError } = await supabase
-      .rpc('claim_broadcast_recipients', { batch_size: 10 })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .rpc('claim_broadcast_recipients' as any, { batch_size: 10 })
 
     if (claimError) throw claimError
     if (!recipients?.length) {

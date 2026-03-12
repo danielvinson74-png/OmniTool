@@ -7,7 +7,8 @@ async function getOrgId(supabase: Awaited<ReturnType<typeof createClient>>, user
     .select('current_organization_id')
     .eq('id', userId)
     .single()
-  return profile?.current_organization_id ?? null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (profile as any)?.current_organization_id ?? null
 }
 
 // GET /api/broadcasts/[id] — full detail with per-step stats
@@ -37,10 +38,13 @@ export async function GET(
     }
 
     // Per-step stats
-    const { data: recipientStats } = await supabase
+    const { data: recipientStatsRaw } = await supabase
       .from('broadcast_recipients')
       .select('step_id, status, has_replied')
       .eq('broadcast_id', id)
+
+    type RecipientStat = { step_id: string; status: string; has_replied: boolean }
+    const recipientStats = recipientStatsRaw as RecipientStat[] | null
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const stepStats: Record<string, any> = {}

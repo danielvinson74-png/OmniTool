@@ -14,12 +14,14 @@ export async function POST(
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { data: profile } = await supabase
+    const { data: profileData } = await supabase
       .from('profiles')
       .select('current_organization_id')
       .eq('id', user.id)
       .single()
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const profile = profileData as any
     if (!profile?.current_organization_id) {
       return NextResponse.json({ error: 'No organization' }, { status: 400 })
     }

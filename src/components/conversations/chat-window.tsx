@@ -23,10 +23,17 @@ import {
   User,
   MessageCircle,
   Bot,
-  BotOff
+  BotOff,
+  Zap,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
+
+interface QuickReply {
+  id: string
+  title: string
+  text: string
+}
 
 interface Message {
   id: string
@@ -71,10 +78,18 @@ export function ChatWindow({ conversation, initialMessages, currentUserId }: Cha
   const [sending, setSending] = useState(false)
   const [aiEnabled, setAiEnabled] = useState(conversation.ai_enabled ?? true)
   const [togglingAi, setTogglingAi] = useState(false)
+  const [quickReplies, setQuickReplies] = useState<QuickReply[]>([])
+  const [showQuickReplies, setShowQuickReplies] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
 
   const lead = conversation.leads
+
+  useEffect(() => {
+    fetch('/api/quick-replies')
+      .then(r => r.json())
+      .then(data => setQuickReplies(data || []))
+  }, [])
 
   const handleToggleAi = async () => {
     setTogglingAi(true)
@@ -392,29 +407,56 @@ export function ChatWindow({ conversation, initialMessages, currentUserId }: Cha
       </div>
 
       {/* Input */}
-      <form onSubmit={handleSend} className="flex gap-2 border-t pt-4 items-end">
-        <Textarea
-          value={newMessage}
-          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewMessage(e.target.value)}
-          onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault()
-              handleSend(e as unknown as React.FormEvent)
-            }
-          }}
-          placeholder="Введите сообщение... (Enter — отправить, Shift+Enter — перенос)"
-          disabled={sending}
-          className="flex-1 min-h-[40px] max-h-[160px] resize-none"
-          rows={1}
-        />
-        <Button type="submit" disabled={!newMessage.trim() || sending}>
-          {sending ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Send className="h-4 w-4" />
+      <div className="border-t pt-4 space-y-2">
+        {showQuickReplies && quickReplies.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {quickReplies.map(qr => (
+              <button
+                key={qr.id}
+                type="button"
+                onClick={() => { setNewMessage(qr.text); setShowQuickReplies(false) }}
+                className="text-xs px-3 py-1.5 rounded-full border bg-muted hover:bg-muted/80 transition-colors text-left"
+              >
+                {qr.title}
+              </button>
+            ))}
+          </div>
+        )}
+        <form onSubmit={handleSend} className="flex gap-2 items-end">
+          {quickReplies.length > 0 && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowQuickReplies(v => !v)}
+              title="Шаблоны ответов"
+            >
+              <Zap className={cn('h-4 w-4', showQuickReplies && 'text-primary')} />
+            </Button>
           )}
-        </Button>
-      </form>
+          <Textarea
+            value={newMessage}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewMessage(e.target.value)}
+            onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault()
+                handleSend(e as unknown as React.FormEvent)
+              }
+            }}
+            placeholder="Введите сообщение... (Enter — отправить, Shift+Enter — перенос)"
+            disabled={sending}
+            className="flex-1 min-h-[40px] max-h-[160px] resize-none"
+            rows={1}
+          />
+          <Button type="submit" disabled={!newMessage.trim() || sending}>
+            {sending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Send className="h-4 w-4" />
+            )}
+          </Button>
+        </form>
+      </div>
     </div>
   )
 }

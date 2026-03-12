@@ -7,6 +7,7 @@ import {
   CreditCard,
   Shield,
   Bot,
+  Zap,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -54,6 +55,11 @@ export const mainNavigation: NavSection[] = [
         title: 'AI Ассистент',
         href: '/settings/ai',
         icon: Bot,
+      },
+      {
+        title: 'Шаблоны ответов',
+        href: '/settings/quick-replies',
+        icon: Zap,
       },
       {
         title: 'Профиль',

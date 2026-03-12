@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create broadcast
-    const { data: broadcast, error: broadcastError } = await supabase
+    const { data: broadcastData2, error: broadcastError } = await supabase
       .from('broadcasts')
       .insert({
         organization_id: orgId,
@@ -87,6 +87,8 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (broadcastError) throw broadcastError
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const broadcast = broadcastData2 as any
 
     // Create steps
     const stepsToInsert = steps.map((step: { step_order: number; message_text: string; delay_days: number }) => ({

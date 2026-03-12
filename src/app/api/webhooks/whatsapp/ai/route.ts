@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
       const adminSupabase = createAdminClient()
       adminSupabase
         .from('broadcast_recipients')
-        .update({ has_replied: true, updated_at: new Date().toISOString() })
+        .update({ has_replied: true, updated_at: new Date().toISOString() } as never)
         .eq('conversation_id', conversationId)
         .eq('status', 'sent')
         .eq('has_replied', false)

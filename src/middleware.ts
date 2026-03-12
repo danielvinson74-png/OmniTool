@@ -15,6 +15,6 @@ export const config = {
      * - public files (images, etc)
      * - api/webhooks (webhook endpoints need to be public)
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|api/webhooks).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|api/webhooks|api/cron).*)',
   ],
 }

@@ -496,6 +496,150 @@ export type Database = {
           created_at?: string
         }
       }
+      broadcasts: {
+        Row: {
+          id: string
+          organization_id: string
+          created_by: string
+          name: string
+          description: string | null
+          status: 'draft' | 'scheduled' | 'sending' | 'sent' | 'cancelled'
+          scheduled_at: string | null
+          segment_filters: Json
+          messenger_type: 'telegram' | 'whatsapp' | null
+          delay_between_sends: number
+          stats_total: number
+          stats_sent: number
+          stats_failed: number
+          stats_replied: number
+          started_at: string | null
+          completed_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          created_by: string
+          name: string
+          description?: string | null
+          status?: 'draft' | 'scheduled' | 'sending' | 'sent' | 'cancelled'
+          scheduled_at?: string | null
+          segment_filters?: Json
+          messenger_type?: 'telegram' | 'whatsapp' | null
+          delay_between_sends?: number
+          stats_total?: number
+          stats_sent?: number
+          stats_failed?: number
+          stats_replied?: number
+          started_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          created_by?: string
+          name?: string
+          description?: string | null
+          status?: 'draft' | 'scheduled' | 'sending' | 'sent' | 'cancelled'
+          scheduled_at?: string | null
+          segment_filters?: Json
+          messenger_type?: 'telegram' | 'whatsapp' | null
+          delay_between_sends?: number
+          stats_total?: number
+          stats_sent?: number
+          stats_failed?: number
+          stats_replied?: number
+          started_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      broadcast_steps: {
+        Row: {
+          id: string
+          broadcast_id: string
+          organization_id: string
+          step_order: number
+          message_text: string
+          delay_days: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          broadcast_id: string
+          organization_id: string
+          step_order: number
+          message_text: string
+          delay_days?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          broadcast_id?: string
+          organization_id?: string
+          step_order?: number
+          message_text?: string
+          delay_days?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      broadcast_recipients: {
+        Row: {
+          id: string
+          broadcast_id: string
+          step_id: string
+          organization_id: string
+          lead_id: string
+          conversation_id: string
+          scheduled_send_at: string
+          status: 'pending' | 'sending' | 'sent' | 'failed' | 'skipped'
+          sent_at: string | null
+          error_message: string | null
+          message_id: string | null
+          has_replied: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          broadcast_id: string
+          step_id: string
+          organization_id: string
+          lead_id: string
+          conversation_id: string
+          scheduled_send_at: string
+          status?: 'pending' | 'sending' | 'sent' | 'failed' | 'skipped'
+          sent_at?: string | null
+          error_message?: string | null
+          message_id?: string | null
+          has_replied?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          broadcast_id?: string
+          step_id?: string
+          organization_id?: string
+          lead_id?: string
+          conversation_id?: string
+          scheduled_send_at?: string
+          status?: 'pending' | 'sending' | 'sent' | 'failed' | 'skipped'
+          sent_at?: string | null
+          error_message?: string | null
+          message_id?: string | null
+          has_replied?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
       ai_settings: {
         Row: {
           id: string
@@ -561,6 +705,12 @@ export type Database = {
           org_id: string
         }
         Returns: boolean
+      }
+      claim_broadcast_recipients: {
+        Args: {
+          batch_size?: number
+        }
+        Returns: Database['public']['Tables']['broadcast_recipients']['Row'][]
       }
     }
     Enums: {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { handleAIResponse } from '@/lib/ai/respond'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 const WHATSAPP_SERVICE_SECRET = process.env.WHATSAPP_SERVICE_SECRET || 'whatsapp-service-secret-key'
 
@@ -24,6 +25,18 @@ export async function POST(request: NextRequest) {
 
     if (!organizationId || !conversationId || !externalChatId) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    }
+
+    // Track broadcast reply (wrapped so it never breaks message ingestion)
+    if (conversationId) {
+      const adminSupabase = createAdminClient()
+      adminSupabase
+        .from('broadcast_recipients')
+        .update({ has_replied: true, updated_at: new Date().toISOString() })
+        .eq('conversation_id', conversationId)
+        .eq('status', 'sent')
+        .eq('has_replied', false)
+        .catch((err: unknown) => console.error('Broadcast reply tracking error:', err))
     }
 
     // Trigger AI response (async)

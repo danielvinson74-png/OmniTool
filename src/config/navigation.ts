@@ -8,6 +8,7 @@ import {
   Shield,
   Bot,
   Zap,
+  Send,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -40,6 +41,11 @@ export const mainNavigation: NavSection[] = [
         title: 'CRM',
         href: '/crm',
         icon: Users,
+      },
+      {
+        title: 'Рассылки',
+        href: '/broadcasts',
+        icon: Send,
       },
     ],
   },

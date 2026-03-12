@@ -41,5 +41,21 @@ services:
       timeout: 10s
       retries: 3
 
+  cron:
+    image: alpine
+    restart: unless-stopped
+    command: >
+      sh -c "apk add --no-cache wget &&
+        while true; do
+          wget -q -O /dev/null --post-data '' \
+            --header='Authorization: Bearer '\"$$CRON_SECRET\"'' \
+            http://omnitool:3000/api/cron/broadcasts || true;
+          sleep 60;
+        done"
+    environment:
+      - CRON_SECRET=${CRON_SECRET}
+    depends_on:
+      - omnitool
+
 volumes:
   whatsapp_sessions:

@@ -188,6 +188,17 @@ async function handleMessage(
     })
     .eq('id', conversation.id)
 
+  // Track broadcast reply (wrapped in try/catch so it never breaks message ingestion)
+  if (conversation.id) {
+    supabase
+      .from('broadcast_recipients')
+      .update({ has_replied: true, updated_at: new Date().toISOString() })
+      .eq('conversation_id', conversation.id)
+      .eq('status', 'sent')
+      .eq('has_replied', false)
+      .catch((err: unknown) => console.error('Broadcast reply tracking error:', err))
+  }
+
   // Trigger AI response (async, don't wait)
   if (conversation.id && messageType === 'text' && messageText && !isEdited) {
     handleAIResponse({

@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { MessageSquare } from 'lucide-react'
 import Link from 'next/link'
+import { ConversationsList } from '@/components/conversations/conversations-list'
 
 export const metadata = {
   title: 'Диалоги | OmniTool',
@@ -86,48 +87,7 @@ export default async function ConversationsPage() {
         </p>
       </div>
 
-      {conversations && conversations.length > 0 ? (
-        <div className="grid gap-4">
-          {conversations.map((conversation) => (
-            <Link key={conversation.id} href={`/conversations/${conversation.id}`}>
-              <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
-                <CardContent className="flex items-center gap-4 p-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                    <MessageSquare className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <p className="font-medium truncate">
-                        {conversation.leads?.name || conversation.leads?.username || 'Без имени'}
-                      </p>
-                      {conversation.unread_count > 0 && (
-                        <span className="ml-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
-                          {conversation.unread_count}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground truncate">
-                      {conversation.last_message_preview || 'Нет сообщений'}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
-      ) : (
-        <Card className="border-dashed">
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-              <MessageSquare className="h-8 w-8 text-muted-foreground" />
-            </div>
-            <CardTitle>Нет диалогов</CardTitle>
-            <CardDescription>
-              Диалоги появятся, когда клиенты начнут писать вашему боту
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      )}
+      <ConversationsList conversations={conversations || []} />
     </div>
   )
 }

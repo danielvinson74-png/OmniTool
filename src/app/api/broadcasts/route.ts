@@ -23,7 +23,7 @@ export async function GET() {
 
     const orgId = profile.current_organization_id
 
-    const { data: broadcasts, error } = await supabase
+    const { data: broadcastsRaw, error } = await supabase
       .from('broadcasts')
       .select('*, broadcast_steps(count)')
       .eq('organization_id', orgId)
@@ -31,6 +31,8 @@ export async function GET() {
 
     if (error) throw error
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const broadcasts = broadcastsRaw as any[]
     return NextResponse.json({ success: true, broadcasts })
   } catch (error) {
     console.error('GET /api/broadcasts error:', error)

@@ -25,14 +25,16 @@ export async function POST(request: NextRequest) {
       .rpc('claim_broadcast_recipients' as any, { batch_size: 10 } as any)
 
     if (claimError) throw claimError
-    if (!recipients?.length) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const recipientsList = recipients as any[]
+    if (!recipientsList?.length) {
       return NextResponse.json({ success: true, processed: 0, duration_ms: Date.now() - startTime })
     }
 
     // Cache broadcast configs to avoid re-fetching for each recipient
     const broadcastCache: Record<string, { delay_between_sends: number; messenger_type: string | null }> = {}
 
-    for (const recipient of recipients) {
+    for (const recipient of recipientsList) {
       // Fetch broadcast config (cached)
       if (!broadcastCache[recipient.broadcast_id]) {
         const { data: bcData } = await supabase
@@ -142,7 +144,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if any broadcasts are now fully complete
-    const broadcastIds = [...new Set(recipients.map((r) => r.broadcast_id))]
+    const broadcastIds = [...new Set(recipientsList.map((r) => r.broadcast_id))]
     for (const broadcastId of broadcastIds) {
       const { count: pendingCount } = await supabase
         .from('broadcast_recipients')

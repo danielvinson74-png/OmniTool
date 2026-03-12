@@ -26,13 +26,15 @@ export async function GET(
     const orgId = await getOrgId(supabase, user.id)
     if (!orgId) return NextResponse.json({ error: 'No organization' }, { status: 400 })
 
-    const { data: broadcast, error } = await supabase
+    const { data: broadcastRaw, error } = await supabase
       .from('broadcasts')
       .select('*, broadcast_steps(*)')
       .eq('id', id)
       .eq('organization_id', orgId)
       .single()
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const broadcast = broadcastRaw as any
     if (error || !broadcast) {
       return NextResponse.json({ error: 'Broadcast not found' }, { status: 404 })
     }
